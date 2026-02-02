@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:spotify_clone/common/helpers/is_dark_mode.dart';
 import 'package:spotify_clone/common/widget/button/basic_app_button.dart';
 import 'package:spotify_clone/core/configs/assets/app_images.dart';
 import 'package:spotify_clone/core/configs/assets/app_vectors.dart';
@@ -65,9 +66,11 @@ class ChooseMode extends StatelessWidget {
                                 height: 80,
                                 width: 80,
                                 decoration: BoxDecoration(
-                                  color: Color(
-                                    0xff30393c,
-                                  ).withValues(alpha: 0.5),
+                                  color: context.isDarkMode
+                                      ? AppColors.primary
+                                      : Color(
+                                          0xff30393c,
+                                        ).withValues(alpha: 0.5),
                                   shape: BoxShape.circle,
                                 ),
                                 child: SvgPicture.asset(
@@ -105,9 +108,9 @@ class ChooseMode extends StatelessWidget {
                                 height: 80,
                                 width: 80,
                                 decoration: BoxDecoration(
-                                  color: Color(
-                                    0xff30393c,
-                                  ).withValues(alpha: 0.5),
+                                  color: context.isDarkMode
+                                      ? Color(0xff30393c).withValues(alpha: 0.5)
+                                      : AppColors.primary,
                                   shape: BoxShape.circle,
                                 ),
                                 child: SvgPicture.asset(
