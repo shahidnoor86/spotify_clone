@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:spotify_clone/common/widget/appbar/app_bar.dart';
@@ -5,8 +6,41 @@ import 'package:spotify_clone/common/widget/button/basic_app_button.dart';
 import 'package:spotify_clone/core/configs/assets/app_vectors.dart';
 import 'package:spotify_clone/presentation/auth/pages/signin.dart';
 
-class SignupPage extends StatelessWidget {
+class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
+
+  @override
+  State<SignupPage> createState() => _SignupPageState();
+}
+
+class _SignupPageState extends State<SignupPage> {
+  TextEditingController emailCtrl = TextEditingController();
+  TextEditingController pwdCtrl = TextEditingController();
+  TextEditingController cpwdCtrl = TextEditingController();
+
+  void createAccount() async {
+    String email = emailCtrl.text.trim();
+    String pwd = pwdCtrl.text.trim();
+    // String cPwd = cpwdCtrl.text.trim();
+
+    if (email == "" || pwd == "") {
+      debugPrint("Please fill all the details");
+    } /* else if (pwd != cPwd) {
+      debugPrint("Password does not match!");
+    }  */ else {
+      // Create new account
+      try {
+        UserCredential userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(email: email, password: pwd);
+        debugPrint("User Created ${userCredential.user.toString()}");
+        if (userCredential.user != null) {
+          Navigator.pop(context);
+        }
+      } on FirebaseAuthException catch (ex) {
+        debugPrint("Error ${ex.message}");
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +62,7 @@ class SignupPage extends StatelessWidget {
             const SizedBox(height: 20),
             _passwordField(context),
             const SizedBox(height: 20),
-            BasicAppButton(title: "Create Account", onPressed: () {}),
+            BasicAppButton(title: "Create Account", onPressed: createAccount),
           ],
         ),
       ),
@@ -52,6 +86,7 @@ class SignupPage extends StatelessWidget {
 
   Widget _emailField(BuildContext context) {
     return TextField(
+      controller: emailCtrl,
       decoration: InputDecoration(
         hintText: "Enter Email",
       ).applyDefaults(Theme.of(context).inputDecorationTheme),
@@ -60,6 +95,7 @@ class SignupPage extends StatelessWidget {
 
   Widget _passwordField(BuildContext context) {
     return TextField(
+      controller: pwdCtrl,
       decoration: InputDecoration(
         hintText: "Password",
       ).applyDefaults(Theme.of(context).inputDecorationTheme),
