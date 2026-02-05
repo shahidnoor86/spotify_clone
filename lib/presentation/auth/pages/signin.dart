@@ -1,12 +1,54 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:spotify_clone/common/widget/appbar/app_bar.dart';
 import 'package:spotify_clone/common/widget/button/basic_app_button.dart';
 import 'package:spotify_clone/core/configs/assets/app_vectors.dart';
+import 'package:spotify_clone/core/hive_manager.dart';
 import 'package:spotify_clone/presentation/auth/pages/signup.dart';
+import 'package:spotify_clone/presentation/home/pages/home_screen.dart';
 
-class SigninPage extends StatelessWidget {
+class SigninPage extends StatefulWidget {
   const SigninPage({super.key});
+
+  @override
+  State<SigninPage> createState() => _SigninPageState();
+}
+
+class _SigninPageState extends State<SigninPage> {
+  TextEditingController emailCtrl = TextEditingController();
+  TextEditingController pwdCtrl = TextEditingController();
+
+  void login() async {
+    String email = emailCtrl.text.trim();
+    String pwd = pwdCtrl.text.trim();
+    if (email == "" || pwd == "") {
+      debugPrint("Please fill all the fields");
+    } else {
+      try {
+        UserCredential userCredential = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(email: email, password: pwd);
+        if (userCredential.user != null) {
+          String name = userCredential.user?.displayName ?? "";
+          String email = userCredential.user?.email ?? "";
+          HiveManager().setUser("isLoggedIn", true);
+          HiveManager().setUser("displayName", name);
+          HiveManager().setUser("email", email);
+
+          String displayName = name.isNotEmpty ? name : email.split("@")[0];
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (BuildContext context) =>
+                  HomeScreen(displayName: displayName),
+            ),
+          );
+        }
+      } on FirebaseAuthException catch (ex) {
+        debugPrint(ex.code.toString());
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +68,7 @@ class SigninPage extends StatelessWidget {
             const SizedBox(height: 20),
             _passwordField(context),
             const SizedBox(height: 20),
-            BasicAppButton(title: "Sign In", onPressed: () {}),
+            BasicAppButton(title: "Sign In", onPressed: login),
           ],
         ),
       ),
@@ -42,6 +84,7 @@ class SigninPage extends StatelessWidget {
 
   Widget _emailField(BuildContext context) {
     return TextField(
+      controller: emailCtrl,
       decoration: InputDecoration(
         hintText: "Enter Email",
       ).applyDefaults(Theme.of(context).inputDecorationTheme),
@@ -50,6 +93,7 @@ class SigninPage extends StatelessWidget {
 
   Widget _passwordField(BuildContext context) {
     return TextField(
+      controller: pwdCtrl,
       decoration: InputDecoration(
         hintText: "Password",
       ).applyDefaults(Theme.of(context).inputDecorationTheme),
