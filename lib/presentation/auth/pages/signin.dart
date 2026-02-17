@@ -1,25 +1,23 @@
-import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:spotify_clone/common/widget/appbar/app_bar.dart';
 import 'package:spotify_clone/common/widget/button/basic_app_button.dart';
 import 'package:spotify_clone/core/configs/assets/app_vectors.dart';
-import 'package:spotify_clone/core/hive_manager.dart';
+// import 'package:spotify_clone/core/hive_manager.dart';
+import 'package:spotify_clone/data/models/auth/signin_user_req.dart';
+import 'package:spotify_clone/domain/usecases/auth/signin.dart';
 import 'package:spotify_clone/presentation/auth/pages/signup.dart';
 import 'package:spotify_clone/presentation/home/pages/home_screen.dart';
+import 'package:spotify_clone/service_locator.dart';
 
-class SigninPage extends StatefulWidget {
-  const SigninPage({super.key});
+class SigninPage extends StatelessWidget {
+  SigninPage({super.key});
 
-  @override
-  State<SigninPage> createState() => _SigninPageState();
-}
-
-class _SigninPageState extends State<SigninPage> {
   TextEditingController emailCtrl = TextEditingController();
   TextEditingController pwdCtrl = TextEditingController();
 
-  void login() async {
+  /* void login() async {
     String email = emailCtrl.text.trim();
     String pwd = pwdCtrl.text.trim();
     if (email == "" || pwd == "") {
@@ -48,7 +46,7 @@ class _SigninPageState extends State<SigninPage> {
         debugPrint(ex.code.toString());
       }
     }
-  }
+  } */
 
   @override
   Widget build(BuildContext context) {
@@ -59,17 +57,47 @@ class _SigninPageState extends State<SigninPage> {
       bottomNavigationBar: _signUpntext(context),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 50),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            _registerText(),
-            const SizedBox(height: 50),
-            _emailField(context),
-            const SizedBox(height: 20),
-            _passwordField(context),
-            const SizedBox(height: 20),
-            BasicAppButton(title: "Sign In", onPressed: login),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _registerText(),
+              const SizedBox(height: 50),
+              _emailField(context),
+              const SizedBox(height: 20),
+              _passwordField(context),
+              const SizedBox(height: 20),
+              BasicAppButton(
+                title: "Sign In",
+                onPressed: () async {
+                  var result = await sl<SigninUseCase>().call(
+                    SigninUserReq(
+                      email: emailCtrl.text.trim(),
+                      password: pwdCtrl.text.trim(),
+                    ),
+                  );
+
+                  result.fold(
+                    (l) {
+                      // Signup failed
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(l.toString())));
+                    },
+                    (r) {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (BuildContext context) => const HomePage(),
+                        ),
+                        (route) => false,
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

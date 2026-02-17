@@ -9,12 +9,12 @@ import 'package:spotify_clone/core/configs/theme/app_theme.dart';
 import 'package:spotify_clone/core/hive_manager.dart';
 import 'package:spotify_clone/presentation/choose_mode/bloc/theme_cubit.dart';
 import 'package:spotify_clone/presentation/splash/pages/splash.dart';
+import 'package:spotify_clone/service_locator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await HiveManager().init();
+  // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // await HiveManager().init();
 
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: kIsWeb
@@ -22,6 +22,8 @@ void main() async {
         : HydratedStorageDirectory((await getTemporaryDirectory()).path),
   );
 
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await initialiseDependencies();
   runApp(const MyApp());
 }
 

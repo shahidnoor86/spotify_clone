@@ -4,7 +4,11 @@ import 'package:flutter_svg/svg.dart';
 import 'package:spotify_clone/common/widget/appbar/app_bar.dart';
 import 'package:spotify_clone/common/widget/button/basic_app_button.dart';
 import 'package:spotify_clone/core/configs/assets/app_vectors.dart';
+import 'package:spotify_clone/data/models/auth/create_user_req.dart';
+import 'package:spotify_clone/domain/usecases/auth/signup.dart';
 import 'package:spotify_clone/presentation/auth/pages/signin.dart';
+import 'package:spotify_clone/presentation/home/pages/home_screen.dart';
+import 'package:spotify_clone/service_locator.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -16,7 +20,7 @@ class SignupPage extends StatefulWidget {
 class _SignupPageState extends State<SignupPage> {
   TextEditingController emailCtrl = TextEditingController();
   TextEditingController pwdCtrl = TextEditingController();
-  TextEditingController cpwdCtrl = TextEditingController();
+  TextEditingController fullNameCtrl = TextEditingController();
 
   void createAccount() async {
     String email = emailCtrl.text.trim();
@@ -51,19 +55,51 @@ class _SignupPageState extends State<SignupPage> {
       bottomNavigationBar: _signIntext(context),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 50),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            _registerText(),
-            const SizedBox(height: 50),
-            _fullNameField(context),
-            const SizedBox(height: 20),
-            _emailField(context),
-            const SizedBox(height: 20),
-            _passwordField(context),
-            const SizedBox(height: 20),
-            BasicAppButton(title: "Create Account", onPressed: createAccount),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _registerText(),
+              const SizedBox(height: 50),
+              _fullNameField(context),
+              const SizedBox(height: 20),
+              _emailField(context),
+              const SizedBox(height: 20),
+              _passwordField(context),
+              const SizedBox(height: 20),
+              // BasicAppButton(title: "Create Account", onPressed: createAccount),
+              BasicAppButton(
+                title: "Create Account",
+                onPressed: () async {
+                  var result = await sl<SignupUseCase>().call(
+                    CreateUserReq(
+                      fullName: fullNameCtrl.text.trim(),
+                      email: emailCtrl.text.trim(),
+                      password: pwdCtrl.text.trim(),
+                    ),
+                  );
+
+                  result.fold(
+                    (l) {
+                      // Signup failed
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(l.toString())));
+                    },
+                    (r) {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (BuildContext context) => const HomePage(),
+                        ),
+                        (route) => false,
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -78,6 +114,7 @@ class _SignupPageState extends State<SignupPage> {
 
   Widget _fullNameField(BuildContext context) {
     return TextField(
+      controller: fullNameCtrl,
       decoration: InputDecoration(
         hintText: "Full Name",
       ).applyDefaults(Theme.of(context).inputDecorationTheme),
