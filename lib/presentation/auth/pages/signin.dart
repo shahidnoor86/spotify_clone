@@ -71,7 +71,7 @@ class SigninPage extends StatelessWidget {
                 title: "Sign In",
                 onPressed: () async {
                   var result = await sl<SigninUseCase>().call(
-                    SigninUserReq(
+                    params: SigninUserReq(
                       email: emailCtrl.text.trim(),
                       password: pwdCtrl.text.trim(),
                     ),

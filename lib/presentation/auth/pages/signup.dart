@@ -72,7 +72,7 @@ class _SignupPageState extends State<SignupPage> {
                 title: "Create Account",
                 onPressed: () async {
                   var result = await sl<SignupUseCase>().call(
-                    CreateUserReq(
+                    params: CreateUserReq(
                       fullName: fullNameCtrl.text.trim(),
                       email: emailCtrl.text.trim(),
                       password: pwdCtrl.text.trim(),
